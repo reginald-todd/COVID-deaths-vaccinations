@@ -118,7 +118,10 @@ from #PercentPopulationVaccinated
 
 --creating view to store data for later visualizations
 
-Create View PercentPopulationVaccinated as
+
+USE PortfolioProject1
+GO
+create view PercentPopulationVaccinated as
 select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
 SUM(cast (vac.new_vaccinations as int)) OVER (Partition by dea.location Order by dea.location, dea.date) as PeopleVaccinatedRolling
 from PortfolioProject1..CovidDeaths$ dea
