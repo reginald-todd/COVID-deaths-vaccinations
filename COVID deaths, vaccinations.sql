@@ -72,7 +72,7 @@ join PortfolioProject1..CovidVaccinations$ vac
 	on dea.location = vac.location
 	and dea.date = vac.date
 where dea.continent is not null
-order by 2,3
+order by 2,3;
 
 -- use CTE
 
@@ -92,9 +92,11 @@ from PopvsVac
 
 -- TEMP TABLE
 
+SET ANSI_WARNINGS OFF
+GO
 
-DROP table if exists #PercentPopulationVaccinated
-create table #PercentPopulationVaccinated
+DROP table if exists PercentPopulationVaccinated
+create table PercentPopulationVaccinated
 (
 Continent nvarchar(255),
 Location nvarchar(255),
@@ -104,7 +106,7 @@ new_vaccinations numeric,
 PeopleVaccinatedRolling numeric,
 )
 
-insert into #PercentPopulationVaccinated
+insert into PercentPopulationVaccinated
 select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(cast (vac.new_vaccinations as int)) OVER (Partition by dea.location Order by dea.location, dea.date) as PeopleVaccinatedRolling
 from PortfolioProject1..CovidDeaths$ dea
 join PortfolioProject1..CovidVaccinations$ vac
@@ -114,22 +116,23 @@ join PortfolioProject1..CovidVaccinations$ vac
 --order by 2,3
 
 select *, (PeopleVaccinatedRolling/population)*100
-from #PercentPopulationVaccinated
+from PercentPopulationVaccinated;
 
 --creating view to store data for later visualizations
 
 
 USE PortfolioProject1
 GO
-create view PercentPopulationVaccinated as
-select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
-SUM(cast (vac.new_vaccinations as int)) OVER (Partition by dea.location Order by dea.location, dea.date) as PeopleVaccinatedRolling
+
+CREATE VIEW PercentPopulationVaccinated2
+AS
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(cast (vac.new_vaccinations as int)) OVER (Partition by dea.location Order by dea.location, dea.date) as PeopleVaccinatedRolling
 from PortfolioProject1..CovidDeaths$ dea
 join PortfolioProject1..CovidVaccinations$ vac
 	on dea.location = vac.location
 	and dea.date = vac.date
 where dea.continent is not null
---order by 2,3
+GO
 
 select * 
-from PercentPopulationVaccinated
+from PercentPopulationVaccinated2
